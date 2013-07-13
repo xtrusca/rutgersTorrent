@@ -1,10 +1,13 @@
 package util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import exceptions.BencodingException;
 
@@ -18,13 +21,14 @@ public class Data {
 	public static int downloaded = 0;
 	public static int uploaded = 0; 
 	public static int dataLeft = 0;
+	public static ArrayList peerList = null;
 	
 	
 	public Data(){
 	
 	}
 	
-	public Data(String torrentFileName, String saveFileName){
+	public Data(String torrentFileName, String saveFileName) throws BencodingException, IOException{
 		
 		createInfoFile(torrentFileName, saveFileName);
 		createInfoHash();
@@ -33,26 +37,46 @@ public class Data {
 		portNumber = torrentInfo.announce_url.getPort();
 		Contact.formGetRequest(0);
 		Contact.sendGetRequest();
+		PeerManagement.createPeerList(Contact.trackerByteArray);
+		peerList = PeerManagement.peerList;
 
 	}
 	
-	public static TorrentInfo createInfoFile(String torrentFileName, String saveFileName){
+	@SuppressWarnings("resource")
+	public static TorrentInfo createInfoFile(String torrentFileName, String saveFileName) throws BencodingException, IOException{
 		
-		try {
-			RandomAccessFile rFile = new RandomAccessFile(torrentFileName, "rw");
-			byte[] fileBytes = new byte[(int) rFile.length()];
-			rFile.read(fileBytes);
-			torrentInfo = new TorrentInfo(fileBytes);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		} catch(IOException e1){
-			System.out.println("File not found");
-		} catch(BencodingException b){
-			
-		}
-		return null;
-	}
+		File file = new File(torrentFileName);
+		    long fileSize = -1;
+		    byte[] fileBytes = null;
+		    InputStream file_stream = null;
+		
+		    fileSize = file.length();
+		    fileBytes = new byte[(int)fileSize];
+		        
+		    try {        
+		      file_stream = new FileInputStream(file);
+		      
+		      if(!file.exists()){
+		        System.err.println("Error:The File" + torrentFileName + " does not exist. Please reload the program with the correct filename");
+		      }
+		      file_stream.read(fileBytes);
+		      
+		      for(int i = 0; i<fileBytes.length; i++){
+		        System.out.print((char)fileBytes[i]);
+		      }
+		      System.out.println();
+		      
+		    } catch (FileNotFoundException e) {
+		      System.out.println("File Not Found.");
+		      e.printStackTrace();
+		    } catch (IOException e1){
+		      System.out.println("Error, cannot read the file.");
+		      e1.printStackTrace();
+		    }
+		    file_stream.close();
+		    torrentInfo = new TorrentInfo(fileBytes);
+		    return torrentInfo;
+		  }
 	
 	public static void createInfoHash(){
 		torrentInfo.info_hash.get(info_hash, 0, info_hash.length);
@@ -71,6 +95,23 @@ public class Data {
 		}
 		System.out.println(convertedValue.toString());
 		return convertedValue.toString();
+	}
+	
+	public static void createPeerList(byte[] trackerResponse){
+		
+		ByteBuffer interval = ByteBuffer.wrap(new byte[] { 'i', 'n', 't', 'e', 'r','v','a','l' });
+		 
+		try {
+			 for(int i = 0; i<trackerResponse.length; i++){
+			        System.out.print((char)trackerResponse[i]);
+			      }
+			      System.out.println();
+			Object decodedResponse = Bencoder2.decode(trackerResponse);
+			
+		} catch (BencodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

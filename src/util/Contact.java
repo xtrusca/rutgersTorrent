@@ -8,8 +8,11 @@ public class Contact {
 	public static String trackerRequest;
 	public static byte[] trackerByteArray;
 	
+	public Contact(){
+		
+	}
+	
 	public static void sendGetRequest(){
-	     PrintWriter out = null;
 	     InputStream input = null;
 	     ByteArrayOutputStream byteResponse = new ByteArrayOutputStream();
 
@@ -36,9 +39,6 @@ public class Contact {
                                + "the connection to: " + trackerRequest);
             System.exit(1);
         }
-        
-        
-        	
     }
 
 	
