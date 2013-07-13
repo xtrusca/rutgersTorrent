@@ -6,21 +6,27 @@ import java.io.*;
 public class Contact {
 	
 	public static String trackerRequest;
+	public static byte[] trackerByteArray;
 	
 	public static void sendGetRequest(){
-		 Socket s = null;
 	     PrintWriter out = null;
-	     BufferedReader in = null;        
-	     BufferedReader stdIn = null;
+	     InputStream input = null;
+	     ByteArrayOutputStream byteResponse = new ByteArrayOutputStream();
 
 		try{
-			s = new Socket(trackerRequest, Data.portNumber);
-			out = new PrintWriter(s.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            stdIn = new BufferedReader(new InputStreamReader(System.in));
-			trackerRequest = stdIn.readLine();
-        	out.println(trackerRequest);
-        	System.out.println("echo: " + in.readLine());
+        	
+			byte[] recievedBytes = new byte[4096];
+        	URL trackerURL = new URL(trackerRequest);
+        	input = trackerURL.openStream();
+        	int i;
+        	
+        	while((i = input.read(recievedBytes)) > 0){
+        		byteResponse.write(recievedBytes, 0, i);
+        	}
+        	
+        	input.close();
+        	
+        	trackerByteArray = byteResponse.toByteArray();
         	
 		}catch (UnknownHostException e) {
             System.err.println("Don't know about host: " + trackerRequest);

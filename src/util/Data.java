@@ -25,6 +25,7 @@ public class Data {
 	}
 	
 	public Data(String torrentFileName, String saveFileName){
+		
 		createInfoFile(torrentFileName, saveFileName);
 		createInfoHash();
 		info_hash_string = convertToHex(info_hash);
@@ -56,13 +57,6 @@ public class Data {
 	public static void createInfoHash(){
 		torrentInfo.info_hash.get(info_hash, 0, info_hash.length);
 		torrentInfo.info_hash.rewind();
-	}
-	
-	public static String bufferToString(ByteBuffer buffer) {
-		byte[] bufferBytes = new byte[buffer.capacity()];
-		buffer.get(bufferBytes, 0, bufferBytes.length);
-		String value = new String(bufferBytes);
-		return value;
 	}
 	
 	public static String convertToHex(byte[] bytes){
